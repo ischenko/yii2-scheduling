@@ -143,12 +143,7 @@ class Event extends Component
     {
         $command = trim($this->buildCommand(), '& ');
         $cwd = dirname($app->request->getScriptFile());
-        if (method_exists('Symfony\Component\Process\Process', 'fromShellCommandline')) {
-            $process = Process::fromShellCommandline($command, $cwd, null, null, null);
-        }
-        else {
-            $process = (new Process($command, $cwd, null, null, null));
-        }
+        $process = Process::fromShellCommandline($command, $cwd, null, null, null);
         $process->run();
         $this->callAfterCallbacks($app);
     }
@@ -207,9 +202,9 @@ class Event extends Component
     {
         $date = new \DateTime('now');
         if ($this->_timezone) {
-            $date->setTimezone($this->_timezone);
+            $date->setTimezone(is_string($this->_timezone) ? new \DateTimeZone($this->_timezone) : $this->_timezone);
         }
-        return CronExpression::factory($this->_expression)->isDue($date);
+        return (new CronExpression($this->_expression))->isDue($date);
     }
 
     /**
